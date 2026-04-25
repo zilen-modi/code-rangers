@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Camera, Loader2, Sparkles, Upload } from 'lucide-react';
+import { Camera, Loader2, Send, Upload } from 'lucide-react';
 
 export function ScanPreviewCard({
   previewUrl,
@@ -16,23 +16,63 @@ export function ScanPreviewCard({
   onTranslateAll: () => void;
   onRescan: () => void;
 }) {
+  const hasFile = !!previewUrl;
+
   return (
     <section className="relative overflow-hidden rounded-2xl border border-primary/20 bg-white/5 p-4 shadow-[0_0_0_1px_hsl(var(--primary)/0.12),0_18px_44px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-      <div className="mb-3 flex items-center justify-end gap-2">
-        <button type="button" onClick={onTranslateAll} disabled={isTranslating} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-medium text-white transition hover:shadow-[0_0_24px_rgba(217,70,239,0.45)]">
-          {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          Translate All
-        </button>
-        <button type="button" onClick={onRescan} className="rounded-full border border-border/70 bg-secondary/80 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white">
-          Rescan
-        </button>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {hasFile && (
+            <button
+              type="button"
+              onClick={onUpload}
+              className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Change Image
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {hasFile && (
+            <button
+              type="button"
+              onClick={onTranslateAll}
+              disabled={isTranslating}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-medium text-white transition hover:shadow-[0_0_24px_rgba(217,70,239,0.45)] disabled:opacity-60"
+            >
+              {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {isTranslating ? 'Analyzing…' : 'Analyze Menu'}
+            </button>
+          )}
+          {hasFile && (
+            <button
+              type="button"
+              onClick={onRescan}
+              disabled={isTranslating}
+              className="rounded-full border border-border/70 bg-secondary/80 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary disabled:opacity-60 dark:border-white/15 dark:bg-white/10 dark:text-white"
+            >
+              Rescan
+            </button>
+          )}
+        </div>
       </div>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="relative flex h-[360px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-background/70 ring-1 ring-primary/10">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className="relative flex h-[360px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-background/70 ring-1 ring-primary/10"
+      >
         {previewUrl ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewUrl} alt="Scanned menu preview" className="h-full w-full object-cover" />
-            <div className="pointer-events-none absolute inset-0 bg-black/30" />
+            <img src={previewUrl} alt="Scanned menu preview" className="h-full w-full object-contain" />
+            {isTranslating && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/50 backdrop-blur-sm">
+                <Loader2 className="h-10 w-10 animate-spin text-white" />
+                <p className="text-sm font-medium text-white">Analyzing menu…</p>
+              </div>
+            )}
           </>
         ) : (
           <div className="space-y-3 text-center">
@@ -40,7 +80,11 @@ export function ScanPreviewCard({
               <Camera className="h-7 w-7 text-foreground/90" />
             </div>
             <p className="text-sm text-muted-foreground">Upload or capture menu</p>
-            <button type="button" onClick={onUpload} className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-secondary/80 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white">
+            <button
+              type="button"
+              onClick={onUpload}
+              className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-secondary/80 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white"
+            >
               <Upload className="h-4 w-4" />
               Choose Image
             </button>

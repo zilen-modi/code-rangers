@@ -199,37 +199,58 @@ export class OllamaAdapter extends BaseAIAdapter {
       const startedAt = Date.now();
       const timeoutMs = input.timeoutMs ?? this.config.timeoutMs ?? 60_000;
 
+      type OllamaChatResponse = {
+        model?: string;
+        message?: { role: string; content: string };
+        prompt_eval_count?: number;
+        eval_count?: number;
+        done?: boolean;
+      };
+
       const result = await this.withRetry(async () => {
         const { signal, cancel } = this.createAbortSignal(timeoutMs);
 
         try {
-          const base64Image = input.imageBuffer.toString('base64');
+          const base64Image = Buffer.isBuffer(input.imageBuffer)
+            ? input.imageBuffer.toString('base64')
+            : Buffer.from(input.imageBuffer).toString('base64');
 
-          const response = await fetch(`${this.baseUrl}/api/generate`, {
+          // Build user message content — fold system prompt in if provided
+          const userContent = input.systemPrompt
+            ? `${input.systemPrompt}\n\n${input.prompt}`
+            : input.prompt;
+
+          // Use /api/chat — more reliable than /api/generate for vision models in Ollama
+          const response = await fetch(`${this.baseUrl}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               model: input.model ?? this.config.defaultModel,
-              prompt: input.prompt,
-              system: input.systemPrompt,
-              images: [base64Image],
+              messages: [
+                {
+                  role: 'user',
+                  content: userContent,
+                  images: [base64Image],
+                },
+              ],
               stream: false,
               options: {
                 temperature: input.temperature ?? 0.2,
-                num_predict: input.maxTokens,
+                num_predict: input.maxTokens ?? 2048,
               },
             }),
             signal,
           });
 
           if (!response.ok) {
+            const body = await response.text().catch(() => '');
             throw new AIAdapterError(
-              `Ollama vision request failed with status ${response.status}.`,
+              `Ollama vision request failed with status ${response.status}. ${body}`.trim(),
               'OLLAMA_HTTP_ERROR',
             );
           }
 
-          return (await response.json()) as OllamaGenerateResponse;
+          return (await response.json()) as OllamaChatResponse;
         } catch (error) {
           if (error instanceof TypeError) {
             throw new ProviderUnavailableError(
@@ -243,11 +264,12 @@ export class OllamaAdapter extends BaseAIAdapter {
         }
       });
 
-      const completionTokens = result.eval_count ?? estimateTokens(result.response ?? '');
+      const text = result.message?.content ?? '';
+      const completionTokens = result.eval_count ?? estimateTokens(text);
       const promptTokens = result.prompt_eval_count ?? estimateTokens(input.prompt);
 
       return {
-        text: result.response ?? '',
+        text,
         usage: {
           promptTokens,
           completionTokens,
