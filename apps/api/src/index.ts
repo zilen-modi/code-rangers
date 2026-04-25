@@ -1,9 +1,12 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth';
 import todoRoutes from './routes/todos';
 import travelRoutes from './routes/travel';
 import translateRoutes from './routes/translate';
+import emergencyRoutes from './routes/emergency';
+import weatherRoutes from './routes/weather';
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -17,6 +20,8 @@ app.use('/api/auth', authRoutes);
 app.use('/todos', todoRoutes);
 app.use('/travel', travelRoutes);
 app.use('/translate', translateRoutes);
+app.use('/emergency', emergencyRoutes);
+app.use('/weather', weatherRoutes);
 
 // Global Error Handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
