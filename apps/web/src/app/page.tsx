@@ -1,27 +1,41 @@
-import { ErrorBoundary } from '@/components/common/error-boundary';
-import { PageWrapper } from '@/components/layout/page-wrapper';
-import { LoginForm } from '@/features/auth/components/login-form';
+'use client';
+
+import { FloatingEmergencyButton } from '@/components/travel/floating-emergency-button';
+import { QuickActions } from '@/components/travel/quick-actions';
+import { Sidebar } from '@/components/travel/sidebar';
+import { SuggestionCard } from '@/components/travel/suggestion-card';
+import { TopBanner } from '@/components/travel/top-banner';
+import { TipsCard } from '@/components/travel/tips-card';
+import { suggestions } from '@/components/travel/travel-data';
+import { EmergencyModal } from '@/components/travel/emergency-modal';
+import { useState } from 'react';
 
 export default function HomePage() {
+  const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
   return (
-    <PageWrapper>
-      <ErrorBoundary>
-        <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
-          <div className="space-y-4">
-            <span className="inline-flex rounded-full border px-3 py-1 text-xs text-muted-foreground">
-              Premium UI foundation
-            </span>
-            <h1 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Build delightful product experiences faster.
-            </h1>
-            <p className="max-w-xl text-muted-foreground">
-              Clean architecture, consistent design tokens, and polished micro-interactions powered by
-              App Router + shadcn + React Query.
-            </p>
+    <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-20 top-12 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute right-4 top-20 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+      </div>
+      <Sidebar />
+      <section className="relative px-4 pb-12 pt-4 md:ml-72 md:px-8 md:pt-8">
+        <div className="mx-auto max-w-5xl space-y-6">
+          <TopBanner />
+          <QuickActions />
+          <div>
+            <h2 className="mb-3 text-sm font-medium text-muted-foreground">Smart Suggestions</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {suggestions.map((suggestion) => (
+                <SuggestionCard key={suggestion.title} suggestion={suggestion} />
+              ))}
+            </div>
           </div>
-          <LoginForm />
+          <TipsCard />
         </div>
-      </ErrorBoundary>
-    </PageWrapper>
+      </section>
+      <FloatingEmergencyButton onClick={() => setIsEmergencyOpen(true)} />
+      <EmergencyModal isOpen={isEmergencyOpen} onClose={() => setIsEmergencyOpen(false)} />
+    </main>
   );
 }
