@@ -1,0 +1,18 @@
+{
+  "name": "serverless-workers",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "serverless deploy"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.550.0",
+    "@aws-sdk/lib-dynamodb": "^3.550.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.137",
+    "@types/node": "^20.0.0",
+    "serverless": "^3.38.0",
+    "typescript": "^5.4.5"
+  }
+}

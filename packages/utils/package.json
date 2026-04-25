@@ -1,0 +1,16 @@
+{
+  "name": "@repo/utils",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc --emitDeclarationOnly --declaration --declarationMap false",
+    "lint": "echo 'No lint configured for utils yet'",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "@repo/config": "workspace:*"
+  }
+}

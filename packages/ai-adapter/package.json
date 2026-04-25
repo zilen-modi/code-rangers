@@ -1,0 +1,19 @@
+{
+  "name": "@repo/ai-adapter",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc --emitDeclarationOnly --declaration --declarationMap false",
+    "lint": "tsc --noEmit",
+    "type-check": "tsc --noEmit",
+    "dev:test": "tsx src/examples/dev-test.ts"
+  },
+  "devDependencies": {
+    "@repo/config": "workspace:*",
+    "@types/node": "^22.13.10",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.2"
+  }
+}

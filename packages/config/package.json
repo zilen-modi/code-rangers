@@ -1,0 +1,13 @@
+{
+  "name": "@repo/config",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./eslint/base": "./eslint/base.cjs",
+    "./eslint/next": "./eslint/next.cjs",
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/nextjs.json": "./tsconfig/nextjs.json",
+    "./tsconfig/react-library.json": "./tsconfig/react-library.json",
+    "./prettier": "./prettier/index.cjs"
+  }
+}

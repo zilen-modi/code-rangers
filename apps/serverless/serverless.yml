@@ -1,0 +1,57 @@
+service: code-rangers-workers
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: ${self:service}-table-${sls:stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+        - Effect: Allow
+          Action:
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource:
+            Fn::GetAtt:
+              - JobsQueue
+              - Arn
+
+functions:
+  processEvent:
+    handler: src/handler.processEvent
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - JobsQueue
+              - Arn
+
+resources:
+  Resources:
+    # SQS Queue Definition
+    JobsQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${self:service}-jobs-queue-${sls:stage}
+        
+    # DynamoDB Table Definition
+    JobsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
