@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import { getAIAdapter } from '@repo/ai-adapter';
 import type { BaseAIAdapter, AIProvider } from '@repo/ai-adapter';
 import { UPLOAD_DIR } from '../middleware/upload.js';
