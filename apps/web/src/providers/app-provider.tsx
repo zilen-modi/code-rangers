@@ -5,6 +5,7 @@ import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { UserProvider } from '@/providers/user-provider';
 import { SosProvider } from '@/providers/sos-provider';
+import { WeatherProvider } from '@/providers/weather-provider';
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -12,8 +13,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       <QueryProvider>
         <UserProvider>
           <SosProvider>
-            {children}
-            <Toaster richColors position="top-right" closeButton />
+            <WeatherProvider>
+              {children}
+              <Toaster richColors position="top-right" closeButton />
+            </WeatherProvider>
           </SosProvider>
         </UserProvider>
       </QueryProvider>

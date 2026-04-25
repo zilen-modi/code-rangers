@@ -4,11 +4,14 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useWeatherData } from '@/providers/weather-provider';
 import { navItems } from './travel-data';
 
 function SidebarPanel({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { city, country, isLoading } = useWeatherData();
+  const locationText = country ? `${city}, ${country}` : city;
 
   return (
     <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/70 p-4 shadow-sm backdrop-blur-xl dark:bg-white/5">
@@ -41,7 +44,9 @@ function SidebarPanel({ onNavigate }: { onNavigate?: () => void }) {
           <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
           Connected
         </div>
-        <p className="text-xs text-emerald-700/80 dark:text-emerald-100/80">Bangkok, Thailand</p>
+        <p className="text-xs text-emerald-700/80 dark:text-emerald-100/80">
+          {isLoading ? 'Fetching location...' : locationText}
+        </p>
       </div>
     </div>
   );
