@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Menu, Moon, Sparkles, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
@@ -8,9 +9,14 @@ import { Container } from './container';
 
 export function Navbar() {
   const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const travelRoutes = ['/', '/scan', '/essentials', '/assistant', '/translate', '/food'];
   const showSidebarMenuButton = travelRoutes.includes(pathname);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -38,7 +44,11 @@ export function Navbar() {
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             className="transition-transform hover:-translate-y-0.5"
           >
-            {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {mounted && resolvedTheme === 'dark' ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </Container>
