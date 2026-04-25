@@ -34,7 +34,7 @@ export const getTravelInfo = async (req: Request, res: Response): Promise<void> 
         return;
     }
 
-    const response: TravelResponse = {
+    const response: TravelResponse<typeof data> = {
       success: true,
       data,
     };

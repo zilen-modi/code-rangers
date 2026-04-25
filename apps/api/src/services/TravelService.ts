@@ -1,6 +1,6 @@
 // We will use global fetch available in Node.js 18+
 
-import { Place } from '../schemas/travel.js';
+import { Place, TravelCategory } from '../schemas/travel.js';
 
 export interface Coordinates {
   lat: number;
@@ -8,6 +8,13 @@ export interface Coordinates {
 }
 
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
+
+function toTitleCase(input: string): string {
+  return input
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
 
 async function fetchFromOverpass(query: string): Promise<Place[]> {
   try {
@@ -55,7 +62,7 @@ async function fetchFromOverpass(query: string): Promise<Place[]> {
 export const getSosNearby = async (
   coords: Coordinates,
   radius: number = 5000,
-): Promise<Record<string, Place[]>> => {
+): Promise<TravelCategory[]> => {
   // Fetch hospitals and police stations
   const query = `
     [out:json][timeout:25];
@@ -69,10 +76,19 @@ export const getSosNearby = async (
   `;
   const places = await fetchFromOverpass(query);
 
-  return {
-    hospital: places.filter((p) => p.type === 'hospital').slice(0, 3),
-    police: places.filter((p) => p.type === 'police').slice(0, 3),
-  };
+  const grouped = places.reduce<Record<string, Place[]>>((acc, place) => {
+    if (!acc[place.type]) {
+      acc[place.type] = [];
+    }
+    acc[place.type].push(place);
+    return acc;
+  }, {});
+
+  return Object.entries(grouped).map(([category, list]) => ({
+    category,
+    categoryLabel: toTitleCase(category),
+    list: list.slice(0, 3),
+  }));
 };
 
 export const getEssentialsNearby = async (

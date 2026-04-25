@@ -17,7 +17,13 @@ export interface Place {
   type: string;
 }
 
-export interface TravelResponse {
+export interface TravelCategory {
+  category: string;
+  categoryLabel: string;
+  list: Place[];
+}
+
+export interface TravelResponse<TData = Record<string, Place[]>> {
   success: boolean;
-  data: Record<string, Place[]>;
+  data: TData;
 }
