@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 
 export function EssentialsMap({
@@ -11,18 +11,32 @@ export function EssentialsMap({
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
-  const center = useMemo<[number, number]>(() => (locations.length ? [locations[0].lat, locations[0].lng] : [13.7563, 100.5018]), [locations]);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
-    const map = L.map(mapRef.current).setView(center, 14);
+    const container = mapRef.current;
+    if (!container || mapInstanceRef.current) return;
+
+    // Guard against stale Leaflet bindings on remounts.
+    const containerWithLeafletId = container as HTMLElement & { _leaflet_id?: number };
+    if (containerWithLeafletId._leaflet_id) {
+      containerWithLeafletId._leaflet_id = undefined;
+    }
+
+    const initialCenter: [number, number] = locations.length
+      ? [locations[0].lat, locations[0].lng]
+      : [13.7563, 100.5018];
+    const map = L.map(container).setView(initialCenter, 14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
     mapInstanceRef.current = map;
     markersLayerRef.current = L.layerGroup().addTo(map);
+
     return () => {
+      markersLayerRef.current?.clearLayers();
+      markersLayerRef.current = null;
       map.remove();
+      mapInstanceRef.current = null;
     };
-  }, [center]);
+  }, []);
 
   useEffect(() => {
     if (!markersLayerRef.current || !mapInstanceRef.current) return;

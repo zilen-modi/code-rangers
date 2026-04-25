@@ -25,7 +25,7 @@ export default function TranslatePage() {
                 const Icon = t.icon;
                 const active = mode === t.id;
                 return (
-                  <button key={t.id} type="button" onClick={() => setMode(t.id)} className={`inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${active ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white' : 'text-muted-foreground hover:bg-foreground/5'}`}>
+                  <button key={t.id} type="button" onClick={() => setMode(t.id)} className={`inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${active ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white' : 'text-foreground/80 hover:bg-secondary/70 hover:text-foreground dark:text-muted-foreground dark:hover:bg-white/10 dark:hover:text-white'}`}>
                     <Icon className="h-4 w-4" />{t.label}
                   </button>
                 );
@@ -44,7 +44,7 @@ export default function TranslatePage() {
             {mode === 'voice' && <div className="mt-3 flex h-52 items-center justify-center rounded-xl border border-border/60 bg-background/75"><button type="button" className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white"><Mic className="h-8 w-8" /></button></div>}
             {mode === 'image' && (
               <div className="mt-3 space-y-3">
-                <button type="button" className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-secondary/80 px-3 py-1.5 text-xs"><Upload className="h-3.5 w-3.5" />New Image</button>
+                <button type="button" className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"><Upload className="h-3.5 w-3.5" />New Image</button>
                 <div className="flex h-[420px] items-center justify-center rounded-xl border border-border/60 bg-background/75"><span className="text-6xl opacity-35">🍜</span></div>
               </div>
             )}
@@ -53,7 +53,7 @@ export default function TranslatePage() {
             <h2 className="mb-3 text-sm font-medium">Quick Travel Phrases</h2>
             <div className="flex flex-wrap gap-2">
               {['Where is the nearest ATM?', 'No peanuts please', 'How much does this cost?', 'I need help'].map((p) => (
-                <button key={p} type="button" className="rounded-full border border-border/60 bg-secondary/70 px-3 py-1.5 text-xs">{p}</button>
+                <button key={p} type="button" className="rounded-full border border-border/60 bg-secondary/75 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">{p}</button>
               ))}
             </div>
           </section>

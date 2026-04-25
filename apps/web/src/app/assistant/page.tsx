@@ -45,7 +45,7 @@ export default function AssistantPage() {
                   <div className="mt-2 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-violet-200">{tag}</span>)}</div>
                   <div className="mt-3 flex gap-2">
                     <button type="button" className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white">View Details</button>
-                    <button type="button" className="inline-flex items-center justify-center rounded-full border border-border/70 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground dark:border-white/15 dark:bg-white/10 dark:text-white">Navigate</button>
+                    <button type="button" className="inline-flex items-center justify-center rounded-full border border-border/70 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">Navigate</button>
                   </div>
                 </article>
               ))}
@@ -55,7 +55,7 @@ export default function AssistantPage() {
             <div className="mx-auto flex max-w-xl items-center gap-2 rounded-full border border-border/70 bg-background/90 px-3 py-1.5 dark:border-white/10 dark:bg-white/5">
               <Sparkles className="h-4 w-4 text-muted-foreground" />
               <input placeholder="Ask anything..." className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-              <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/60 bg-secondary/80 text-foreground dark:border-white/10 dark:bg-white/10 dark:text-white"><WandSparkles className="h-3.5 w-3.5" /></button>
+              <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/60 bg-secondary/80 text-foreground hover:bg-secondary dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"><WandSparkles className="h-3.5 w-3.5" /></button>
               <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white"><Send className="h-3.5 w-3.5" /></button>
             </div>
           </footer>
