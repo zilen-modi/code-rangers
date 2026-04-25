@@ -45,7 +45,14 @@ export const tips: Tip[] = [
   { title: 'Popular right now', description: 'Night markets open at 6 PM. Get there early for best food selection.', icon: ShieldAlert },
 ];
 
-export type EmergencyItem = { name: string; distance: string; cost: string; tag: string };
+export type EmergencyItem = {
+  name: string;
+  distance: string;
+  cost: string;
+  tag: string;
+  lat?: number;
+  lng?: number;
+};
 export type EmergencyCategory = { category: string; icon: LucideIcon; iconClassName: string; items: EmergencyItem[] };
 export const emergencyData: EmergencyCategory[] = [
   {

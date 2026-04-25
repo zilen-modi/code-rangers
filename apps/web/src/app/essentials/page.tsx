@@ -3,8 +3,16 @@
 import { EmergencyModal } from '@/components/travel/emergency-modal';
 import { FloatingEmergencyButton } from '@/components/travel/floating-emergency-button';
 import { Sidebar } from '@/components/travel/sidebar';
+import {
+  DEFAULT_TRAVEL_COORDS,
+  ESSENTIALS_DEFAULT_COST,
+  ESSENTIALS_DEFAULT_NOTE,
+  GEOLOCATION_OPTIONS,
+} from '@/config/travel';
 import { useTravelInfoQuery } from '@/features/travel/hooks/use-travel-info-query';
 import { TravelPlace } from '@/features/travel/types';
+import { calculateDistanceKm, formatDistanceKm, toLatLngQuery } from '@/lib/geo';
+import { buildGoogleMapsSearchUrl } from '@/lib/maps';
 import { BatteryCharging, Landmark, MapPinned, Navigation, Toilet } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
@@ -13,8 +21,6 @@ const EssentialsMap = dynamic(
   () => import('@/components/travel/essentials-map').then((m) => m.EssentialsMap),
   { ssr: false },
 );
-
-const DEFAULT_COORDS = { lat: 13.7563, lng: 100.5018 };
 
 type CategoryKey = 'charging' | 'atm' | 'petrol' | 'toilets';
 
@@ -57,21 +63,6 @@ const quickCategories = [
   },
 ];
 
-function haversineDistanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const earthRadiusKm = 6371;
-  const deltaLat = toRad(b.lat - a.lat);
-  const deltaLng = toRad(b.lng - a.lng);
-  const x =
-    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-    Math.cos(toRad(a.lat)) *
-      Math.cos(toRad(b.lat)) *
-      Math.sin(deltaLng / 2) *
-      Math.sin(deltaLng / 2);
-  const y = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-  return earthRadiusKm * y;
-}
-
 function toCategoryLocations(
   places: TravelPlace[] | undefined,
   type: CategoryKey,
@@ -82,17 +73,17 @@ function toCategoryLocations(
   }
 
   return places.map((place) => {
-    const distanceKm = haversineDistanceKm(userCoords, { lat: place.lat, lng: place.lon });
+    const distanceKm = calculateDistanceKm(userCoords, { lat: place.lat, lng: place.lon });
     const tag = place.tags.amenity || place.tags.tourism || place.type || 'Nearby';
 
     return {
       name: place.name || 'Unknown place',
       type,
-      distance: `${distanceKm.toFixed(1)} km`,
-      cost: 'Varies',
+      distance: formatDistanceKm(distanceKm),
+      cost: ESSENTIALS_DEFAULT_COST,
       tag,
-      note: place.tags.opening_hours || 'Check timing before visiting',
-      mapsQuery: `${place.lat},${place.lon}`,
+      note: place.tags.opening_hours || ESSENTIALS_DEFAULT_NOTE,
+      mapsQuery: toLatLngQuery({ lat: place.lat, lng: place.lon }),
       lat: place.lat,
       lng: place.lon,
     };
@@ -103,7 +94,7 @@ export default function EssentialsPage() {
   const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('charging');
   const [showMap, setShowMap] = useState(true);
-  const [coords, setCoords] = useState(DEFAULT_COORDS);
+  const [coords, setCoords] = useState(DEFAULT_TRAVEL_COORDS);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -119,13 +110,9 @@ export default function EssentialsPage() {
           });
         },
         () => {
-          setCoords(DEFAULT_COORDS);
+          setCoords(DEFAULT_TRAVEL_COORDS);
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 8000,
-          maximumAge: 60000,
-        },
+        GEOLOCATION_OPTIONS,
       );
     }
   }, []);
@@ -151,10 +138,7 @@ export default function EssentialsPage() {
   }, [coords, data]);
   const filteredLocations = essentialLocations.filter((l) => l.type === activeCategory);
   const openLocationMap = (query: string) => {
-    window.open(
-      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
-      '_blank',
-    );
+    window.open(buildGoogleMapsSearchUrl(query), '_blank');
   };
 
   return (

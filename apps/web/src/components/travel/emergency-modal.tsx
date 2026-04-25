@@ -5,41 +5,30 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ShieldAlert, X } from 'lucide-react';
 import { EmergencySection } from './emergency-section';
 import { EmergencyCategory, EmergencyItem } from './travel-data';
+import { SOS_DEFAULT_COST } from '@/config/travel';
 import { TravelPlace } from '@/features/travel/types';
+import { calculateDistanceKm, formatDistanceKm } from '@/lib/geo';
 import { useSosData } from '@/providers/sos-provider';
-
-function haversineDistanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const earthRadiusKm = 6371;
-  const deltaLat = toRad(b.lat - a.lat);
-  const deltaLng = toRad(b.lng - a.lng);
-  const x =
-    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-    Math.cos(toRad(a.lat)) *
-      Math.cos(toRad(b.lat)) *
-      Math.sin(deltaLng / 2) *
-      Math.sin(deltaLng / 2);
-  const y = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-  return earthRadiusKm * y;
-}
 
 function toEmergencyItems(
   places: TravelPlace[],
   userCoords: { lat: number; lng: number },
 ): EmergencyItem[] {
   return places.map((place) => {
-    const distanceKm = haversineDistanceKm(userCoords, { lat: place.lat, lng: place.lon });
+    const distanceKm = calculateDistanceKm(userCoords, { lat: place.lat, lng: place.lon });
     return {
       name: place.name || 'Unknown place',
-      distance: `${distanceKm.toFixed(1)} km`,
-      cost: 'Emergency support',
+      distance: formatDistanceKm(distanceKm),
+      cost: SOS_DEFAULT_COST,
       tag: place.tags.amenity || place.type,
+      lat: place.lat,
+      lng: place.lon,
     };
   });
 }
 
 export function EmergencyModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { categories, coords, locationError, isLoading, isError } = useSosData();
+  const { categories, coords, locationError, isLoading, isError, requestLocation } = useSosData();
 
   const sections = useMemo(() => {
     if (coords === null) {
@@ -74,6 +63,15 @@ export function EmergencyModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
             </div>
             <div className="max-h-[65vh] space-y-6 overflow-y-auto pr-1">
               {locationError ? <p className="text-sm text-amber-300">{locationError}</p> : null}
+              {locationError ? (
+                <button
+                  type="button"
+                  onClick={requestLocation}
+                  className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-400"
+                >
+                  Enable Location
+                </button>
+              ) : null}
               {locationError === null && coords === null ? (
                 <p className="text-sm text-slate-300">Detecting your location for SOS services...</p>
               ) : null}
