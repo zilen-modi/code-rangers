@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
+  role: z.enum(['TOURIST', 'HOTEL_MANAGER', 'ADMIN']).default('TOURIST'),
 });
 
 export const loginSchema = z.object({
@@ -23,7 +24,9 @@ export const updateTodoSchema = z.object({
 
 export const translateSchema = z.object({
   inputLanguage: z.string().min(1, 'Input language is required (e.g., "English", "Hindi", "es")'),
-  responseLanguage: z.string().min(1, 'Response language is required (e.g., "French", "Japanese", "de")'),
+  responseLanguage: z
+    .string()
+    .min(1, 'Response language is required (e.g., "French", "Japanese", "de")'),
   text: z.string().optional(),
   requestId: z.string().optional(),
 });

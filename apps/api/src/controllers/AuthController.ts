@@ -12,8 +12,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password } = parsedParams.data;
-    const result = await authService.signup(email, password);
+    const { email, password, role } = parsedParams.data;
+    const result = await authService.signup(email, password, role);
     res.status(201).json({ message: 'User created successfully', ...result });
   } catch (error: any) {
     if (error.message === 'Email already in use') {
