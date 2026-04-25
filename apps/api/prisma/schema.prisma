@@ -33,11 +33,29 @@ enum PlaceType {
 }
 
 model Place {
-  id        Int       @id @default(autoincrement())
-  type      PlaceType
-  name      String
-  address   String
-  images    String[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           Int       @id @default(autoincrement())
+  type         PlaceType
+  name         String
+  address      String
+  images       String[]
+  lat          Float?
+  lng          Float?
+  priceLevel   String?
+  openingHours String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  reviews      Review[]
+}
+
+model Review {
+  id           Int      @id @default(autoincrement())
+  placeId      Int
+  place        Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  reviewerName String
+  rating       Float
+  comment      String
+  reviewerType String
+  helpfulCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

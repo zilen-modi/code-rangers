@@ -6,7 +6,12 @@ export class PlaceController {
   
   static async getPlaces(req: Request, res: Response, next: NextFunction) {
     try {
-      const places = await placeService.getAllPlaces();
+      const lat = req.query.lat ? parseFloat(req.query.lat as string) : undefined;
+      const lng = req.query.lng ? parseFloat(req.query.lng as string) : undefined;
+      const type = req.query.type as PlaceType | undefined;
+      const dish = req.query.dish as string | undefined;
+
+      const places = await placeService.getAllPlaces({ lat, lng, type, dish });
       res.json({ message: 'Places fetched successfully', data: places });
     } catch (err) {
       next(err);
@@ -30,20 +35,36 @@ export class PlaceController {
       next(err);
     }
   }
+  
+  static async addReview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const placeId = parseInt(req.params.id as string, 10);
+      if (isNaN(placeId)) {
+         res.status(400).json({ message: 'Invalid place ID' });
+         return;
+      }
+
+      const { reviewerName, reviewerType, rating, comment } = req.body;
+      if (!reviewerName || !reviewerType || typeof rating !== 'number' || !comment) {
+         res.status(400).json({ message: 'reviewerName, reviewerType, rating (number), and comment are required' });
+         return;
+      }
+
+      const review = await placeService.createReview(placeId, { reviewerName, reviewerType, rating, comment });
+      res.status(201).json({ message: 'Review added successfully', data: review });
+    } catch (err) {
+      next(err);
+    }
+  }
 
   static async createPlace(req: Request, res: Response, next: NextFunction) {
     try {
-      const { name, address, type } = req.body;
+      const { name, address, type, lat, lng, priceLevel, openingHours } = req.body;
       if (!name || !address || !type) {
          res.status(400).json({ message: 'name, address, and type are required' });
          return;
       }
-      if (type !== 'HOTEL' && type !== 'RESTAURANT') {
-         res.status(400).json({ message: 'type must be HOTEL or RESTAURANT' });
-         return;
-      }
 
-      // Handle image paths from multer
       const files = req.files as Express.Multer.File[];
       const imagePaths: string[] = files ? files.map(file => file.filename) : [];
 
@@ -51,7 +72,11 @@ export class PlaceController {
         name,
         address,
         type: type as PlaceType,
-        images: imagePaths
+        images: imagePaths,
+        lat: lat ? parseFloat(lat) : null,
+        lng: lng ? parseFloat(lng) : null,
+        priceLevel,
+        openingHours
       });
 
       res.status(201).json({ message: 'Place created successfully', data: place });
@@ -68,18 +93,16 @@ export class PlaceController {
          return;
       }
       
-      const { name, address, type } = req.body;
+      const { name, address, type, lat, lng, priceLevel, openingHours } = req.body;
       const updateData: any = {};
       
       if (name) updateData.name = name;
       if (address) updateData.address = address;
-      if (type) {
-        if (type !== 'HOTEL' && type !== 'RESTAURANT') {
-           res.status(400).json({ message: 'type must be HOTEL or RESTAURANT' });
-           return;
-        }
-        updateData.type = type as PlaceType;
-      }
+      if (type) updateData.type = type as PlaceType;
+      if (lat !== undefined) updateData.lat = parseFloat(lat);
+      if (lng !== undefined) updateData.lng = parseFloat(lng);
+      if (priceLevel !== undefined) updateData.priceLevel = priceLevel;
+      if (openingHours !== undefined) updateData.openingHours = openingHours;
 
       const files = req.files as Express.Multer.File[];
       if (files && files.length > 0) {
