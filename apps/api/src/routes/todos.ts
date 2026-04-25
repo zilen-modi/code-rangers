@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth.js';
-import * as TodoController from '../controllers/TodoController.js';
+import { authenticate } from '../middleware/auth';
+import * as TodoController from '../controllers/TodoController';
 
 const router = Router();
 

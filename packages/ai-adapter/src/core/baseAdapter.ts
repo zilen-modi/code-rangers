@@ -7,9 +7,13 @@ import {
   EmbedTextResult,
   GenerateTextInput,
   GenerateTextResult,
+  GenerateVisionInput,
+  GenerateVisionResult,
   HealthCheckResult,
   RetryConfig,
   StreamTextChunk,
+  TranscribeAudioInput,
+  TranscribeAudioResult,
 } from './types';
 
 const DEFAULT_RETRY_CONFIG: RetryConfig = {
@@ -35,6 +39,14 @@ export abstract class BaseAIAdapter {
 
   async embedText(_input: EmbedTextInput): Promise<EmbedTextResult> {
     throw new AIAdapterError('Embedding is not implemented for this provider.', 'NOT_IMPLEMENTED');
+  }
+
+  async generateVision(_input: GenerateVisionInput): Promise<GenerateVisionResult> {
+    throw new AIAdapterError('Vision is not implemented for this provider.', 'NOT_IMPLEMENTED');
+  }
+
+  async transcribeAudio(_input: TranscribeAudioInput): Promise<TranscribeAudioResult> {
+    throw new AIAdapterError('Audio transcription is not implemented for this provider.', 'NOT_IMPLEMENTED');
   }
 
   protected async withMiddleware<T>(
