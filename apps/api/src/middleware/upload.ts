@@ -42,6 +42,8 @@ const ALLOWED_VOICE_MIMES = [
 const fileFilter: multer.Options['fileFilter'] = (_req, file, cb) => {
   if (file.fieldname === 'image' && ALLOWED_IMAGE_MIMES.includes(file.mimetype)) {
     cb(null, true);
+  } else if (file.fieldname === 'images' && ALLOWED_IMAGE_MIMES.includes(file.mimetype)) {
+    cb(null, true);
   } else if (file.fieldname === 'voice' && ALLOWED_VOICE_MIMES.includes(file.mimetype)) {
     cb(null, true);
   } else {
@@ -63,5 +65,18 @@ export const translationUpload = multer({
   { name: 'image', maxCount: 1 },
   { name: 'voice', maxCount: 1 },
 ]);
+
+/**
+ * Multer middleware for places endpoint.
+ * Accepts 'images' field (max 3 files).
+ */
+export const placesUpload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    files: 3,
+    fileSize: 10 * 1024 * 1024, // 10MB per image
+  },
+});
 
 export { UPLOAD_DIR };
