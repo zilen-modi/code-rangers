@@ -23,12 +23,12 @@ export const navItems: NavItem[] = [
   { label: 'Scan', icon: Camera, href: '/scan' },
 ];
 
-export type QuickAction = { label: string; icon: LucideIcon; iconClassName: string };
+export type QuickAction = { label: string; icon: LucideIcon; iconClassName: string; href: string };
 export const quickActions: QuickAction[] = [
-  { label: 'Find Food', icon: Beef, iconClassName: 'from-orange-500 to-red-500' },
-  { label: 'Translate', icon: Languages, iconClassName: 'from-violet-500 to-fuchsia-500' },
-  { label: 'Scan Menu', icon: Camera, iconClassName: 'from-sky-500 to-blue-600' },
-  { label: 'Essentials', icon: Zap, iconClassName: 'from-pink-500 to-rose-500' },
+  { label: 'Find Food', icon: Beef, iconClassName: 'from-orange-500 to-red-500', href: '/food' },
+  { label: 'Translate', icon: Languages, iconClassName: 'from-violet-500 to-fuchsia-500', href: '/translate' },
+  { label: 'Scan Menu', icon: Camera, iconClassName: 'from-sky-500 to-blue-600', href: '/scan' },
+  { label: 'Essentials', icon: Zap, iconClassName: 'from-pink-500 to-rose-500', href: '/essentials' },
 ];
 
 export type Suggestion = { emoji: string; title: string; subtitle: string; tag: string; gradientClassName: string };

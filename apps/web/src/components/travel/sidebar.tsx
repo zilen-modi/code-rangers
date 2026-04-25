@@ -2,13 +2,14 @@
 
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { navItems } from './travel-data';
 
-function SidebarPanel() {
+function SidebarPanel({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+
   return (
     <div className="flex h-full flex-col rounded-2xl border border-border/60 bg-background/70 p-4 shadow-sm backdrop-blur-xl dark:bg-white/5">
       <nav className="space-y-2">
@@ -16,9 +17,13 @@ function SidebarPanel() {
           const Icon = item.icon;
           const isActive = pathname === item.href;
           return (
-            <Link
+            <button
               key={item.label}
-              href={item.href}
+              type="button"
+              onClick={() => {
+                router.push(item.href);
+                onNavigate?.();
+              }}
               className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${
                 isActive
                   ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-foreground shadow-[0_0_24px_hsl(var(--primary)/0.25)]'
@@ -27,7 +32,7 @@ function SidebarPanel() {
             >
               <Icon className="h-4 w-4" />
               <span>{item.label}</span>
-            </Link>
+            </button>
           );
         })}
       </nav>
@@ -61,7 +66,7 @@ export function Sidebar() {
             <button type="button" onClick={() => setIsOpen(false)} className="absolute right-3 top-3 z-10 rounded-lg bg-background/80 p-1.5 text-foreground/80 dark:bg-white/10" aria-label="Close menu">
               <X className="h-4 w-4" />
             </button>
-            <SidebarPanel />
+            <SidebarPanel onNavigate={() => setIsOpen(false)} />
           </motion.div>
         </div>
       )}

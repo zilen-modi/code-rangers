@@ -1,9 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { quickActions } from './travel-data';
 
 export function QuickActions() {
+  const router = useRouter();
+
   return (
     <section>
       <h2 className="mb-3 text-sm font-medium text-muted-foreground">Quick Actions</h2>
@@ -16,6 +19,7 @@ export function QuickActions() {
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.18 }}
+              onClick={() => router.push(action.href)}
               className="group rounded-2xl border border-border/60 bg-background/70 p-6 shadow-sm backdrop-blur-xl dark:bg-white/5"
               type="button"
             >
