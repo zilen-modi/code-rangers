@@ -1,9 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import authRoutes from './routes/auth.js';
-import todoRoutes from './routes/todos.js';
-import travelRoutes from './routes/travel.js';
-import translateRoutes from './routes/translate.js';
+import authRoutes from './routes/auth';
+import todoRoutes from './routes/todos';
+import travelRoutes from './routes/travel';
+import translateRoutes from './routes/translate';
 
 const app = express();
 const PORT = process.env.PORT || 4000;

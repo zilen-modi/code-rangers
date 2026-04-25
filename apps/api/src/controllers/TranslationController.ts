@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { translateSchema } from '../schemas/index.js';
-import { TranslationService } from '../services/TranslationService.js';
+import { translateSchema } from '../schemas/index';
+import { TranslationService } from '../services/TranslationService';
 
 const translationService = new TranslationService();
 

@@ -1,4 +1,4 @@
-import { TodoRepository } from '../repositories/TodoRepository.js';
+import { TodoRepository } from '../repositories/TodoRepository';
 
 export class TodoService {
   private todoRepository: TodoRepository;

@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { translationUpload } from '../middleware/upload.js';
-import * as TranslationController from '../controllers/TranslationController.js';
+import { translationUpload } from '../middleware/upload';
+import * as TranslationController from '../controllers/TranslationController';
 
 const router = Router();
 

@@ -1,6 +1,6 @@
 // We will use global fetch available in Node.js 18+
 
-import { Place } from '../schemas/travel.js';
+import { Place } from '../schemas/travel';
 
 export interface Coordinates {
   lat: number;

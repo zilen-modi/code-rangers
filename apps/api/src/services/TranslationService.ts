@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { getAIAdapter } from '@repo/ai-adapter';
 import type { BaseAIAdapter, AIProvider } from '@repo/ai-adapter';
-import { UPLOAD_DIR } from '../middleware/upload.js';
+import { UPLOAD_DIR } from '../middleware/upload';
 
 // ─── Provider & Model Configuration ──────────────────────────────────
 // Set TRANSLATION_PROVIDER to 'openai' (recommended) or 'ollama' (free/local).

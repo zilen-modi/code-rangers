@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as TravelService from '../services/TravelService.js';
-import { travelQuerySchema, TravelResponse } from '../schemas/travel.js';
+import * as TravelService from '../services/TravelService';
+import { travelQuerySchema, TravelResponse } from '../schemas/travel';
 
 export const getTravelInfo = async (req: Request, res: Response): Promise<void> => {
   try {
