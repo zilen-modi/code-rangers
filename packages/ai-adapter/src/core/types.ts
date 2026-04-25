@@ -49,6 +49,38 @@ export type EmbedTextResult = {
   metadata?: AdapterMetadata;
 };
 
+export type GenerateVisionInput = {
+  prompt: string;
+  imageBuffer: Buffer;
+  imageMimeType?: string;
+  systemPrompt?: string;
+  temperature?: number;
+  maxTokens?: number;
+  model?: string;
+  timeoutMs?: number;
+  metadata?: Record<string, unknown>;
+};
+
+export type GenerateVisionResult = {
+  text: string;
+  usage?: AdapterUsage;
+  metadata?: AdapterMetadata;
+};
+
+export type TranscribeAudioInput = {
+  audioBuffer: Buffer;
+  audioMimeType?: string;
+  language?: string;
+  model?: string;
+  timeoutMs?: number;
+};
+
+export type TranscribeAudioResult = {
+  text: string;
+  language?: string;
+  duration?: number;
+  metadata?: AdapterMetadata;
+};
 export type HealthCheckResult = {
   ok: boolean;
   provider: AIProvider;
@@ -57,7 +89,7 @@ export type HealthCheckResult = {
 };
 
 export type AIAdapterMiddlewareContext = {
-  operation: 'generateText' | 'streamText' | 'embedText' | 'healthCheck';
+  operation: 'generateText' | 'streamText' | 'embedText' | 'healthCheck' | 'generateVision' | 'transcribeAudio';
   provider: AIProvider;
   input?: unknown;
   startedAt: number;
