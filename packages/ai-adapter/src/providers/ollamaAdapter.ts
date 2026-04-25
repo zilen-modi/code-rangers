@@ -4,6 +4,8 @@ import {
   AdapterConfig,
   GenerateTextInput,
   GenerateTextResult,
+  GenerateVisionInput,
+  GenerateVisionResult,
   HealthCheckResult,
   StreamTextChunk,
 } from '../core/types';
@@ -201,6 +203,74 @@ export class OllamaAdapter extends BaseAIAdapter {
     } finally {
       cancel();
     }
+  }
+
+  async generateVision(input: GenerateVisionInput): Promise<GenerateVisionResult> {
+    return this.withMiddleware('generateVision', input, async () => {
+      const startedAt = Date.now();
+      const timeoutMs = input.timeoutMs ?? this.config.timeoutMs ?? 60_000;
+
+      const result = await this.withRetry(async () => {
+        const { signal, cancel } = this.createAbortSignal(timeoutMs);
+
+        try {
+          const base64Image = input.imageBuffer.toString('base64');
+
+          const response = await fetch(`${this.baseUrl}/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: input.model ?? this.config.defaultModel,
+              prompt: input.prompt,
+              system: input.systemPrompt,
+              images: [base64Image],
+              stream: false,
+              options: {
+                temperature: input.temperature ?? 0.2,
+                num_predict: input.maxTokens,
+              },
+            }),
+            signal,
+          });
+
+          if (!response.ok) {
+            throw new AIAdapterError(
+              `Ollama vision request failed with status ${response.status}.`,
+              'OLLAMA_HTTP_ERROR',
+            );
+          }
+
+          return (await response.json()) as OllamaGenerateResponse;
+        } catch (error) {
+          if (error instanceof TypeError) {
+            throw new ProviderUnavailableError(
+              'Ollama is unavailable. Is the service running on port 11434?',
+              error,
+            );
+          }
+          throw this.normalizeError(error, 'Failed to generate vision response with Ollama.');
+        } finally {
+          cancel();
+        }
+      });
+
+      const completionTokens = result.eval_count ?? estimateTokens(result.response ?? '');
+      const promptTokens = result.prompt_eval_count ?? estimateTokens(input.prompt);
+
+      return {
+        text: result.response ?? '',
+        usage: {
+          promptTokens,
+          completionTokens,
+          totalTokens: promptTokens + completionTokens,
+        },
+        metadata: {
+          provider: 'ollama',
+          model: result.model ?? input.model ?? this.config.defaultModel,
+          latencyMs: Date.now() - startedAt,
+        },
+      };
+    });
   }
 
   async healthCheck(): Promise<HealthCheckResult> {

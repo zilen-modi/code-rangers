@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { signupSchema, loginSchema } from '../schemas/index.js';
-import { AuthService } from '../services/AuthService.js';
+import { signupSchema, loginSchema } from '../schemas/index';
+import { AuthService } from '../services/AuthService';
 
 const authService = new AuthService();
 

@@ -2,10 +2,10 @@
   "name": "@repo/ai-adapter",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc --emitDeclarationOnly --declaration --declarationMap false",
+    "build": "tsc -b",
     "lint": "tsc --noEmit",
     "type-check": "tsc --noEmit",
     "dev:test": "tsx src/examples/dev-test.ts"

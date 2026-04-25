@@ -8,6 +8,7 @@ import {
   StreamTextChunk,
 } from '../core/types';
 import { OllamaAdapter } from './ollamaAdapter';
+import { OpenAIAdapter } from './openaiAdapter';
 
 class PlaceholderProviderAdapter extends BaseAIAdapter {
   async generateText(_input: GenerateTextInput): Promise<GenerateTextResult> {
@@ -42,6 +43,7 @@ export function getAIAdapter(
     case 'ollama':
       return new OllamaAdapter(config);
     case 'openai':
+      return new OpenAIAdapter(config);
     case 'anthropic':
       return new PlaceholderProviderAdapter({ provider, ...config });
     default:
@@ -49,4 +51,4 @@ export function getAIAdapter(
   }
 }
 
-export { OllamaAdapter };
+export { OllamaAdapter, OpenAIAdapter };

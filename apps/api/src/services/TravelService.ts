@@ -45,14 +45,20 @@ async function fetchFromOverpass(query: string): Promise<Place[]> {
       throw new Error('Invalid JSON response from Overpass API');
     }
 
-    return (data.elements || []).map((element: any) => ({
-      id: element.id,
-      lat: element.lat || element.center?.lat,
-      lon: element.lon || element.center?.lon,
-      tags: element.tags || {},
-      name: element.tags?.name || 'Unknown',
-      type: element.tags?.amenity || element.tags?.tourism || 'place',
-    }));
+    return (data.elements || []).map((element: any) => {
+      const lat = element.lat || element.center?.lat;
+      const lon = element.lon || element.center?.lon;
+      
+      return {
+        id: element.id,
+        lat,
+        lon,
+        tags: element.tags || {},
+        name: element.tags?.name || 'Unknown',
+        type: element.tags?.amenity || element.tags?.tourism || 'place',
+        googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
+      };
+    });
   } catch (error) {
     console.error('Error in fetchFromOverpass:', error);
     throw error;

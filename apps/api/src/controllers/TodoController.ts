@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { AuthRequest } from '../middleware/auth.js';
-import { createTodoSchema, updateTodoSchema } from '../schemas/index.js';
-import { TodoService } from '../services/TodoService.js';
+import { AuthRequest } from '../middleware/auth';
+import { createTodoSchema, updateTodoSchema } from '../schemas/index';
+import { TodoService } from '../services/TodoService';
 
 const todoService = new TodoService();
 

@@ -15,6 +15,7 @@ export interface Place {
   tags: Record<string, string>;
   name: string;
   type: string;
+  googleMapsUrl: string;
 }
 
 export interface TravelCategory {
