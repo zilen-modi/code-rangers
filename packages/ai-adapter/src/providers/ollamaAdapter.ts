@@ -1,6 +1,12 @@
 import { BaseAIAdapter } from '../core/baseAdapter';
 import { AIAdapterError, ProviderUnavailableError } from '../core/errors';
-import { AdapterConfig, GenerateTextInput, GenerateTextResult, HealthCheckResult, StreamTextChunk } from '../core/types';
+import {
+  AdapterConfig,
+  GenerateTextInput,
+  GenerateTextResult,
+  HealthCheckResult,
+  StreamTextChunk,
+} from '../core/types';
 import { estimateTokens } from '../utils/tokenizer';
 import { buildPrompt } from '../utils/promptBuilder';
 
@@ -64,13 +70,19 @@ export class OllamaAdapter extends BaseAIAdapter {
           });
 
           if (!response.ok) {
-            throw new AIAdapterError(`Ollama request failed with status ${response.status}.`, 'OLLAMA_HTTP_ERROR');
+            throw new AIAdapterError(
+              `Ollama request failed with status ${response.status}.`,
+              'OLLAMA_HTTP_ERROR',
+            );
           }
 
           return (await response.json()) as OllamaGenerateResponse;
         } catch (error) {
           if (error instanceof TypeError) {
-            throw new ProviderUnavailableError('Ollama is unavailable. Is the service running on port 11434?', error);
+            throw new ProviderUnavailableError(
+              'Ollama is unavailable. Is the service running on port 11434?',
+              error,
+            );
           }
           throw this.normalizeError(error, 'Failed to generate text with Ollama.');
         } finally {
@@ -126,7 +138,10 @@ export class OllamaAdapter extends BaseAIAdapter {
       });
 
       if (!response.ok) {
-        throw new AIAdapterError(`Ollama stream failed with status ${response.status}.`, 'OLLAMA_HTTP_ERROR');
+        throw new AIAdapterError(
+          `Ollama stream failed with status ${response.status}.`,
+          'OLLAMA_HTTP_ERROR',
+        );
       }
 
       if (!response.body) {
@@ -169,8 +184,7 @@ export class OllamaAdapter extends BaseAIAdapter {
                   promptTokens: parsed.prompt_eval_count ?? estimateTokens(prompt),
                   completionTokens: parsed.eval_count ?? undefined,
                   totalTokens:
-                    (parsed.prompt_eval_count ?? estimateTokens(prompt)) +
-                    (parsed.eval_count ?? 0),
+                    (parsed.prompt_eval_count ?? estimateTokens(prompt)) + (parsed.eval_count ?? 0),
                 }
               : undefined,
           };
@@ -178,7 +192,10 @@ export class OllamaAdapter extends BaseAIAdapter {
       }
     } catch (error) {
       if (error instanceof TypeError) {
-        throw new ProviderUnavailableError('Ollama is unavailable. Is the service running on port 11434?', error);
+        throw new ProviderUnavailableError(
+          'Ollama is unavailable. Is the service running on port 11434?',
+          error,
+        );
       }
       throw this.normalizeError(error, 'Failed to stream text with Ollama.');
     } finally {

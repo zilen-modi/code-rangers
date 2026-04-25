@@ -1,6 +1,12 @@
 import { BaseAIAdapter } from '../core/baseAdapter';
 import { AIAdapterError } from '../core/errors';
-import { AdapterConfig, AIProvider, GenerateTextInput, GenerateTextResult, StreamTextChunk } from '../core/types';
+import {
+  AdapterConfig,
+  AIProvider,
+  GenerateTextInput,
+  GenerateTextResult,
+  StreamTextChunk,
+} from '../core/types';
 import { OllamaAdapter } from './ollamaAdapter';
 
 class PlaceholderProviderAdapter extends BaseAIAdapter {

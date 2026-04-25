@@ -15,7 +15,8 @@ export default function SignupPage() {
               Create your account to start managing your tasks.
             </h1>
             <p className="max-w-xl text-muted-foreground">
-              Join today to securely organize and build your Todo platform powered by our fast backend.
+              Join today to securely organize and build your Todo platform powered by our fast
+              backend.
             </p>
           </div>
           <SignupForm />

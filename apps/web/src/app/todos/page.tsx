@@ -75,25 +75,51 @@ export default function TodosPage() {
     <PageWrapper>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Your Todos</h1>
-          <Button variant="outline" onClick={handleLogout}>Logout</Button>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Your Todos
+          </h1>
+          <Button variant="outline" onClick={handleLogout}>
+            Logout
+          </Button>
         </div>
         <form onSubmit={handleCreate} className="flex gap-2">
-          <Input value={newTodo} onChange={(e) => setNewTodo(e.target.value)} placeholder="What needs to be done?" />
+          <Input
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            placeholder="What needs to be done?"
+          />
           <Button type="submit">Add</Button>
         </form>
 
         <div className="space-y-3 mt-8">
-          {todos.map(t => (
-            <div key={t.id} className="flex items-center justify-between p-4 border rounded-xl shadow-sm hover:shadow-premium transition-shadow">
+          {todos.map((t) => (
+            <div
+              key={t.id}
+              className="flex items-center justify-between p-4 border rounded-xl shadow-sm hover:shadow-premium transition-shadow"
+            >
               <div className="flex gap-3 items-center">
-                <input type="checkbox" checked={t.completed} onChange={() => handleToggle(t)} className="h-5 w-5 cursor-pointer"/>
-                <span className={t.completed ? 'line-through text-muted-foreground' : 'text-foreground'}>{t.title}</span>
+                <input
+                  type="checkbox"
+                  checked={t.completed}
+                  onChange={() => handleToggle(t)}
+                  className="h-5 w-5 cursor-pointer"
+                />
+                <span
+                  className={t.completed ? 'line-through text-muted-foreground' : 'text-foreground'}
+                >
+                  {t.title}
+                </span>
               </div>
-              <Button variant="outline" size="sm" onClick={() => handleDelete(t.id)}>Delete</Button>
+              <Button variant="outline" size="sm" onClick={() => handleDelete(t.id)}>
+                Delete
+              </Button>
             </div>
           ))}
-          {todos.length === 0 && <p className="text-muted-foreground text-center py-6">No todos created yet! Why not add one?</p>}
+          {todos.length === 0 && (
+            <p className="text-muted-foreground text-center py-6">
+              No todos created yet! Why not add one?
+            </p>
+          )}
         </div>
       </div>
     </PageWrapper>

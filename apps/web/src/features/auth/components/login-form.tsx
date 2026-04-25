@@ -69,7 +69,11 @@ export function LoginForm() {
         {errors.password ? <p className="text-sm text-red-500">{errors.password.message}</p> : null}
       </div>
 
-      <Button type="submit" className="w-full transition-transform hover:-translate-y-0.5" disabled={loginMutation.isPending}>
+      <Button
+        type="submit"
+        className="w-full transition-transform hover:-translate-y-0.5"
+        disabled={loginMutation.isPending}
+      >
         {loginMutation.isPending ? <ButtonLoading label="Signing in" /> : 'Sign In'}
       </Button>
 

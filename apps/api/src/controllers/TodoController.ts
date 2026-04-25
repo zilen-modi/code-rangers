@@ -48,8 +48,8 @@ export const updateTodo = async (req: AuthRequest, res: Response): Promise<void>
     res.status(200).json({ message: 'Todo updated', todo: updatedTodo });
   } catch (error: any) {
     if (error.message === 'Todo not found') {
-        res.status(404).json({ message: error.message });
-        return;
+      res.status(404).json({ message: error.message });
+      return;
     }
     res.status(500).json({ message: 'Internal server error', error: String(error) });
   }
@@ -67,8 +67,8 @@ export const deleteTodo = async (req: AuthRequest, res: Response): Promise<void>
     res.status(200).json({ message: 'Todo deleted successfully' });
   } catch (error: any) {
     if (error.message === 'Todo not found') {
-        res.status(404).json({ message: error.message });
-        return;
+      res.status(404).json({ message: error.message });
+      return;
     }
     res.status(500).json({ message: 'Internal server error', error: String(error) });
   }

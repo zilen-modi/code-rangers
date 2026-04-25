@@ -21,7 +21,7 @@ export class AuthService {
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET || 'super-secret-jwt-key',
-      { expiresIn: '24h' }
+      { expiresIn: '24h' },
     );
 
     return { token, user: { id: user.id, email: user.email } };
@@ -41,7 +41,7 @@ export class AuthService {
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET || 'super-secret-jwt-key',
-      { expiresIn: '24h' }
+      { expiresIn: '24h' },
     );
 
     return { token, user: { id: user.id, email: user.email } };

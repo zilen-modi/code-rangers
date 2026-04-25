@@ -15,8 +15,8 @@ export default function HomePage() {
               Build delightful product experiences faster.
             </h1>
             <p className="max-w-xl text-muted-foreground">
-              Clean architecture, consistent design tokens, and polished micro-interactions powered by
-              App Router + shadcn + React Query.
+              Clean architecture, consistent design tokens, and polished micro-interactions powered
+              by App Router + shadcn + React Query.
             </p>
           </div>
           <LoginForm />

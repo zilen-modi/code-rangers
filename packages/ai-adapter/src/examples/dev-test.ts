@@ -18,7 +18,9 @@ async function main() {
   console.info('Health check:', health);
 
   if (!health.ok) {
-    console.info('Ollama is unavailable. Start it and re-run `pnpm --filter @repo/ai-adapter dev:test`.');
+    console.info(
+      'Ollama is unavailable. Start it and re-run `pnpm --filter @repo/ai-adapter dev:test`.',
+    );
     return;
   }
 

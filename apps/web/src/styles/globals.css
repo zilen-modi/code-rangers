@@ -18,7 +18,6 @@
   --accent: 317 90% 65%;
   --accent-foreground: 0 0% 100%;
 
-  
   --radius: 0.9rem;
 }
 
@@ -50,7 +49,9 @@ body {
 
 body {
   @apply bg-background text-foreground antialiased;
-  transition: background-color 220ms ease, color 220ms ease;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
 }
 
 h1,

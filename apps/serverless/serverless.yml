@@ -14,7 +14,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:GetItem
             - dynamodb:UpdateItem
-          Resource: "arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+          Resource: 'arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
         - Effect: Allow
           Action:
             - sqs:ReceiveMessage
@@ -39,13 +39,13 @@ resources:
   Resources:
     # SQS Queue Definition
     JobsQueue:
-      Type: "AWS::SQS::Queue"
+      Type: 'AWS::SQS::Queue'
       Properties:
         QueueName: ${self:service}-jobs-queue-${sls:stage}
-        
+
     # DynamoDB Table Definition
     JobsTable:
-      Type: "AWS::DynamoDB::Table"
+      Type: 'AWS::DynamoDB::Table'
       Properties:
         TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
