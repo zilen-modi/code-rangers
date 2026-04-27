@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Send, Sparkles, Star, WandSparkles } from 'lucide-react';
+import { Loader2, Send, Sparkles, Star, WandSparkles } from 'lucide-react';
 import { EmergencyModal } from '@/components/travel/emergency-modal';
 import { FloatingEmergencyButton } from '@/components/travel/floating-emergency-button';
 import { Sidebar } from '@/components/travel/sidebar';
 import { DEFAULT_TRAVEL_COORDS, GEOLOCATION_OPTIONS } from '@/config/travel';
 import { useAssistantChatMutation } from '@/features/assistant/hooks/use-assistant-chat-mutation';
-import { AssistantRecommendation } from '@/features/assistant/types';
+import { AssistantStructuredResponse } from '@/features/assistant/types';
 import { ApiError } from '@/services/api-client';
 
 type AssistantMessage = {
@@ -15,6 +15,11 @@ type AssistantMessage = {
   role: 'assistant' | 'user';
   text: string;
 };
+
+function toDistanceValue(distance: string): number {
+  const value = Number.parseFloat(distance);
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+}
 
 export default function AssistantPage() {
   const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
@@ -27,8 +32,9 @@ export default function AssistantPage() {
       text: 'Hey! Tell me what you are craving and I will suggest nearby places.',
     },
   ]);
-  const [recommendations, setRecommendations] = useState<AssistantRecommendation[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const [structuredResponse, setStructuredResponse] = useState<AssistantStructuredResponse | null>(null);
   const chatMutation = useAssistantChatMutation();
 
   useEffect(() => {
@@ -52,8 +58,17 @@ export default function AssistantPage() {
     [chatMutation.isPending, prompt],
   );
 
+  const closestDistance = useMemo(() => {
+    if (!structuredResponse?.items.length) return Number.POSITIVE_INFINITY;
+    return Math.min(...structuredResponse.items.map((item) => toDistanceValue(item.distance)));
+  }, [structuredResponse]);
+
   const sendMessage = async () => {
-    const trimmedPrompt = prompt.trim();
+    await sendMessageWithText(prompt);
+  };
+
+  const sendMessageWithText = async (rawMessage: string) => {
+    const trimmedPrompt = rawMessage.trim();
     if (trimmedPrompt.length === 0 || chatMutation.isPending) return;
 
     const userMessage: AssistantMessage = {
@@ -70,17 +85,20 @@ export default function AssistantPage() {
         message: trimmedPrompt,
         lat: coords.lat,
         lng: coords.lng,
+        sessionId,
+        history: messages.map((item) => ({ role: item.role, text: item.text })),
       });
+      setSessionId(result.data.sessionId);
 
       setMessages((previous) => [
         ...previous,
         {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          text: result.data.reply,
+          text: result.data.response.message,
         },
       ]);
-      setRecommendations(result.data.recommendations);
+      setStructuredResponse(result.data.response);
     } catch (error) {
       const message =
         (error as ApiError).message || (error instanceof Error ? error.message : 'Failed to contact assistant');
@@ -120,33 +138,88 @@ export default function AssistantPage() {
                   {errorMessage}
                 </div>
               ) : null}
-              {recommendations.map((item) => (
-                <article key={item.name} className="rounded-xl border border-border/60 bg-background/85 p-3 dark:border-white/10 dark:bg-white/5">
+              {chatMutation.isPending ? (
+                <div className="rounded-xl border border-border/60 bg-background/85 p-3 text-xs text-foreground/85 dark:border-white/10 dark:bg-white/5 dark:text-white/85">
+                  <div className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
+                    AI Thinking...
+                  </div>
+                </div>
+              ) : null}
+              {structuredResponse ? (
+                <div className="rounded-xl border border-border/60 bg-background/85 p-3 dark:border-white/10 dark:bg-white/5">
+                  <div className="mb-1 inline-flex rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium uppercase text-violet-200">
+                    {structuredResponse.type}
+                  </div>
+                  <p className="text-sm font-semibold">{structuredResponse.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{structuredResponse.message}</p>
+                </div>
+              ) : null}
+              {structuredResponse ? (
+                <div className="flex flex-wrap gap-2">
+                  {structuredResponse.quickActions.map((action) => (
+                    <button
+                      key={action}
+                      type="button"
+                      onClick={() => {
+                        setPrompt(action);
+                        void sendMessageWithText(action);
+                      }}
+                      className="rounded-full border border-border/60 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                    >
+                      {action}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {structuredResponse?.items.map((item, index) => (
+                <article key={`${item.name}-${item.distance}`} className="rounded-xl border border-border/60 bg-background/85 p-3 dark:border-white/10 dark:bg-white/5">
                   <div className="mb-1 flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-semibold">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
                     </div>
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-500"><Star className="h-3.5 w-3.5 fill-current" />{item.rating}</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-500">
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      Action
+                    </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">📍 {item.distance} • {item.price}</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-violet-200">{tag}</span>)}</div>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => window.open(item.mapsUrl, '_blank')}
-                      className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white"
-                    >
-                      View Details
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => window.open(item.mapsUrl, '_blank')}
-                      className="inline-flex items-center justify-center rounded-full border border-border/70 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-                    >
-                      Navigate
-                    </button>
+                  <p className="text-xs text-muted-foreground">📍 {item.distance} • {item.cost}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {index === 0 ? (
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] text-emerald-300">
+                        Best choice
+                      </span>
+                    ) : null}
+                    {toDistanceValue(item.distance) === closestDistance ? (
+                      <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] text-sky-300">
+                        Closest
+                      </span>
+                    ) : null}
+                    {item.tags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-violet-200">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
+                  {item.mapsUrl ? (
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => window.open(item.mapsUrl, '_blank')}
+                        className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white"
+                      >
+                        {item.action === 'call' ? 'Call / View' : 'View'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => window.open(item.mapsUrl, '_blank')}
+                        className="inline-flex items-center justify-center rounded-full border border-border/70 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                      >
+                        Navigate
+                      </button>
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>
