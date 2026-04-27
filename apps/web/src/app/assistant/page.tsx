@@ -1,17 +1,92 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Send, Sparkles, Star, WandSparkles } from 'lucide-react';
 import { EmergencyModal } from '@/components/travel/emergency-modal';
 import { FloatingEmergencyButton } from '@/components/travel/floating-emergency-button';
 import { Sidebar } from '@/components/travel/sidebar';
+import { DEFAULT_TRAVEL_COORDS, GEOLOCATION_OPTIONS } from '@/config/travel';
+import { useAssistantChatMutation } from '@/features/assistant/hooks/use-assistant-chat-mutation';
+import { AssistantRecommendation } from '@/features/assistant/types';
+import { ApiError } from '@/services/api-client';
+
+type AssistantMessage = {
+  id: string;
+  role: 'assistant' | 'user';
+  text: string;
+};
 
 export default function AssistantPage() {
   const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
-  const recommendations = [
-    { name: 'Som Tam Stand', subtitle: 'Street Food', distance: '0.8 km', price: '$', rating: 4.8, tags: ['Local vibe', 'Fresh daily'] },
-    { name: 'Krua Apsorn', subtitle: 'Traditional Thai', distance: '0.9 km', price: '$$', rating: 4.9, tags: ['Must try', 'Award-winning'] },
-  ];
+  const [prompt, setPrompt] = useState('');
+  const [coords, setCoords] = useState(DEFAULT_TRAVEL_COORDS);
+  const [messages, setMessages] = useState<AssistantMessage[]>([
+    {
+      id: 'initial-assistant',
+      role: 'assistant',
+      text: 'Hey! Tell me what you are craving and I will suggest nearby places.',
+    },
+  ]);
+  const [recommendations, setRecommendations] = useState<AssistantRecommendation[]>([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const chatMutation = useAssistantChatMutation();
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      () => {
+        setCoords(DEFAULT_TRAVEL_COORDS);
+      },
+      GEOLOCATION_OPTIONS,
+    );
+  }, []);
+
+  const isSendDisabled = useMemo(
+    () => chatMutation.isPending || prompt.trim().length === 0,
+    [chatMutation.isPending, prompt],
+  );
+
+  const sendMessage = async () => {
+    const trimmedPrompt = prompt.trim();
+    if (trimmedPrompt.length === 0 || chatMutation.isPending) return;
+
+    const userMessage: AssistantMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      text: trimmedPrompt,
+    };
+    setMessages((previous) => [...previous, userMessage]);
+    setPrompt('');
+    setErrorMessage('');
+
+    try {
+      const result = await chatMutation.mutateAsync({
+        message: trimmedPrompt,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          text: result.data.reply,
+        },
+      ]);
+      setRecommendations(result.data.recommendations);
+    } catch (error) {
+      const message =
+        (error as ApiError).message || (error instanceof Error ? error.message : 'Failed to contact assistant');
+      setErrorMessage(message);
+    }
+  };
 
   return (
     <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-background text-foreground">
@@ -24,14 +99,27 @@ export default function AssistantPage() {
           </header>
           <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6">
             <div className="mx-auto max-w-xl space-y-4">
-              <div className="rounded-xl border border-border/60 bg-background/85 p-3 text-xs text-foreground/85 dark:border-white/10 dark:bg-white/5 dark:text-white/85">
-                I found some great local spots for you! Here are my top recommendations:
-              </div>
-              <div className="flex justify-end">
-                <div className="max-w-[82%] rounded-full border border-fuchsia-300/40 bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white">
-                  I want to try authentic Thai food
+              {messages.map((message) =>
+                message.role === 'assistant' ? (
+                  <div
+                    key={message.id}
+                    className="rounded-xl border border-border/60 bg-background/85 p-3 text-xs text-foreground/85 dark:border-white/10 dark:bg-white/5 dark:text-white/85"
+                  >
+                    {message.text}
+                  </div>
+                ) : (
+                  <div key={message.id} className="flex justify-end">
+                    <div className="max-w-[82%] rounded-full border border-fuchsia-300/40 bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white">
+                      {message.text}
+                    </div>
+                  </div>
+                ),
+              )}
+              {errorMessage ? (
+                <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-700 dark:text-red-300">
+                  {errorMessage}
                 </div>
-              </div>
+              ) : null}
               {recommendations.map((item) => (
                 <article key={item.name} className="rounded-xl border border-border/60 bg-background/85 p-3 dark:border-white/10 dark:bg-white/5">
                   <div className="mb-1 flex items-start justify-between gap-2">
@@ -44,8 +132,20 @@ export default function AssistantPage() {
                   <p className="text-xs text-muted-foreground">📍 {item.distance} • {item.price}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">{item.tags.map((tag) => <span key={tag} className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-violet-200">{tag}</span>)}</div>
                   <div className="mt-3 flex gap-2">
-                    <button type="button" className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white">View Details</button>
-                    <button type="button" className="inline-flex items-center justify-center rounded-full border border-border/70 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">Navigate</button>
+                    <button
+                      type="button"
+                      onClick={() => window.open(item.mapsUrl, '_blank')}
+                      className="inline-flex flex-1 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.open(item.mapsUrl, '_blank')}
+                      className="inline-flex items-center justify-center rounded-full border border-border/70 bg-secondary/80 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                    >
+                      Navigate
+                    </button>
                   </div>
                 </article>
               ))}
@@ -54,9 +154,29 @@ export default function AssistantPage() {
           <footer className="border-t border-border/50 p-3 dark:border-white/10">
             <div className="mx-auto flex max-w-xl items-center gap-2 rounded-full border border-border/70 bg-background/90 px-3 py-1.5 dark:border-white/10 dark:bg-white/5">
               <Sparkles className="h-4 w-4 text-muted-foreground" />
-              <input placeholder="Ask anything..." className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+              <input
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void sendMessage();
+                  }
+                }}
+                placeholder="Ask anything..."
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              />
               <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/60 bg-secondary/80 text-foreground hover:bg-secondary dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"><WandSparkles className="h-3.5 w-3.5" /></button>
-              <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white"><Send className="h-3.5 w-3.5" /></button>
+              <button
+                type="button"
+                onClick={() => {
+                  void sendMessage();
+                }}
+                disabled={isSendDisabled}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white disabled:opacity-50"
+              >
+                <Send className="h-3.5 w-3.5" />
+              </button>
             </div>
           </footer>
         </div>

@@ -23,7 +23,7 @@ export function Navbar() {
       <Container className="flex h-16 items-center justify-between">
         <div className="inline-flex items-center gap-2 text-sm font-medium">
           <Sparkles className="h-4 w-4 text-accent" />
-          Code Rangers UI
+          Travel companion
         </div>
 
         <div className="flex items-center gap-2">
