@@ -9,6 +9,7 @@ import emergencyRoutes from './routes/emergency';
 import weatherRoutes from './routes/weather';
 import menuRoutes from './routes/menu';
 import assistantRoutes from './routes/assistant';
+import foodRoutes from './routes/food';
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -26,6 +27,7 @@ app.use('/emergency', emergencyRoutes);
 app.use('/weather', weatherRoutes);
 app.use('/menu', menuRoutes);
 app.use('/assistant', assistantRoutes);
+app.use('/food', foodRoutes);
 
 // Global Error Handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

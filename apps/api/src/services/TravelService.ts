@@ -101,23 +101,62 @@ export const getEssentialsNearby = async (
   coords: Coordinates,
   radius: number = 3000,
 ): Promise<Record<string, Place[]>> => {
-  // Fetch ATMs and charging stations and petrol pumps (fuel)
+  // Fetch a broad set of practical categories dynamically.
+  const amenityFilters = [
+    'atm',
+    'fuel',
+    'charging_station',
+    'toilets',
+    'restaurant',
+    'cafe',
+    'fast_food',
+    'pharmacy',
+    'hospital',
+    'clinic',
+    'bank',
+    'bus_station',
+  ];
+  const tourismFilters = ['hotel', 'hostel', 'guest_house', 'motel'];
+
+  const amenityQuery = amenityFilters
+    .flatMap((amenity) => [
+      `node["amenity"="${amenity}"](around:${radius},${coords.lat},${coords.lng});`,
+      `way["amenity"="${amenity}"](around:${radius},${coords.lat},${coords.lng});`,
+    ])
+    .join('\n      ');
+
+  const tourismQuery = tourismFilters
+    .flatMap((tourism) => [
+      `node["tourism"="${tourism}"](around:${radius},${coords.lat},${coords.lng});`,
+      `way["tourism"="${tourism}"](around:${radius},${coords.lat},${coords.lng});`,
+    ])
+    .join('\n      ');
+
   const query = `
     [out:json][timeout:25];
     (
-      node["amenity"="atm"](around:${radius},${coords.lat},${coords.lng});
-      node["amenity"="fuel"](around:${radius},${coords.lat},${coords.lng});
-      node["amenity"="charging_station"](around:${radius},${coords.lat},${coords.lng});
+      ${amenityQuery}
+      ${tourismQuery}
     );
     out center;
   `;
   const places = await fetchFromOverpass(query);
 
-  return {
-    atm: places.filter((p) => p.type === 'atm').slice(0, 3),
-    charging_station: places.filter((p) => p.type === 'charging_station').slice(0, 3),
-    fuel: places.filter((p) => p.type === 'fuel').slice(0, 3),
-  };
+  const grouped = places.reduce<Record<string, Place[]>>((acc, place) => {
+    if (!place.type) return acc;
+    if (!acc[place.type]) {
+      acc[place.type] = [];
+    }
+    acc[place.type].push(place);
+    return acc;
+  }, {});
+
+  return Object.fromEntries(
+    Object.entries(grouped).map(([type, list]) => [
+      type,
+      list.filter((place) => place.name !== 'Unknown').slice(0, 6),
+    ]),
+  );
 };
 
 export const getPlacesNearby = async (
